@@ -13,14 +13,14 @@ use semver::Version;
 use crate::error::ContractError;
 use crate::msg::{
     AskResponse, Cw20HookMsg, Cw721DepositResponse, Cw721HookMsg, ExecuteMsg, InstantiateMsg,
-    QueryMsg,
+    QueryMsg, GetAllAsksResponse,
 };
 use crate::state::{Ask, Cw721Deposits, ASKS, CW721_DEPOSITS};
 
 const CONTRACT_NAME: &str = "crates.io:nft-marketplace";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-pub const NATIVE_DENOM: &str = "ujuno";
+pub const NATIVE_DENOM: &str = "ujunox";
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
@@ -64,6 +64,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
             collection,
             token_id,
         } => to_binary(&query_ask(deps, collection, token_id)?),
+        QueryMsg::GetAllAsks {} => to_binary(&query_all_asks(deps)?)
     }
 }
 
@@ -323,4 +324,10 @@ pub fn query_ask(deps: Deps, collection: String, token_id: String) -> StdResult<
     let ask = ASKS.may_load(deps.storage, (&collection, &token_id))?;
 
     Ok(AskResponse { ask })
+}
+
+pub fn query_all_asks(deps: Deps) -> StdResult<GetAllAsksResponse> {
+    let res:StdResult<Vec<_>> = ASKS.range(deps.storage, None, None, Order::Ascending).collect();
+    let asks = res?;
+    Ok(GetAllAsksResponse { asks })
 }

@@ -35,6 +35,7 @@ pub enum QueryMsg {
         collection: String,
         token_id: String,
     },
+    GetAllAsks {}
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -47,6 +48,12 @@ pub struct Cw721DepositResponse {
 #[serde(rename_all = "snake_case")]
 pub struct AskResponse {
     pub ask: Option<Ask>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct GetAllAsksResponse {
+    pub asks: Vec<((String, String), Ask)>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

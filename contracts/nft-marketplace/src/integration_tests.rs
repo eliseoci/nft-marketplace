@@ -20,7 +20,7 @@ mod tests {
     const USER: &str = "juno10c3slrqx3369mfsr9670au22zvq082jaej8ve4";
     const BUYER: &str = "juno10c3slrqx3369mfsr9670au22zvq082jaejxx23";
     const ADMIN: &str = "ADMIN";
-    const NATIVE_DENOM: &str = "ujuno";
+    const NATIVE_DENOM: &str = "ujunox";
     const TOKEN_ID: &str = "0";
 
     pub fn contract_deposit_cw20() -> Box<dyn Contract<Empty>> {
