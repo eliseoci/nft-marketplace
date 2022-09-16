@@ -33,14 +33,21 @@ impl NftContract {
     }
 
     /// Get Owner of an NFT
-    pub fn get_owner<Q, T, CQ>(&self, querier: &Q, token_id:String) -> StdResult<OwnerOfResponse>
+    pub fn get_owner<Q, T, CQ>(&self, querier: &Q, token_id: String) -> StdResult<OwnerOfResponse>
     where
-        Q:Querier,
+        Q: Querier,
         T: Into<String>,
         CQ: CustomQuery,
     {
-        let msg = QueryMsg::OwnerOf { token_id:token_id, include_expired:None };
-        let query = WasmQuery::Smart { contract_addr: self.addr().into(), msg: to_binary(&msg)? }.into();
+        let msg = QueryMsg::OwnerOf {
+            token_id: token_id,
+            include_expired: None,
+        };
+        let query = WasmQuery::Smart {
+            contract_addr: self.addr().into(),
+            msg: to_binary(&msg)?,
+        }
+        .into();
         let res: OwnerOfResponse = QuerierWrapper::<CQ>::new(querier).query(&query)?;
         Ok(res)
     }
@@ -48,14 +55,20 @@ impl NftContract {
     /// Get All Tokens
     pub fn all_tokens<Q, T, CQ>(&self, querier: &Q) -> StdResult<TokensResponse>
     where
-        Q:Querier,
+        Q: Querier,
         T: Into<String>,
         CQ: CustomQuery,
     {
-        let msg = QueryMsg::AllTokens { start_after: None, limit: None };
-        let query = WasmQuery::Smart { contract_addr: self.addr().into(), msg: to_binary(&msg)? }.into();
+        let msg = QueryMsg::AllTokens {
+            start_after: None,
+            limit: None,
+        };
+        let query = WasmQuery::Smart {
+            contract_addr: self.addr().into(),
+            msg: to_binary(&msg)?,
+        }
+        .into();
         let res: TokensResponse = QuerierWrapper::<CQ>::new(querier).query(&query)?;
         Ok(res)
     }
-    
 }

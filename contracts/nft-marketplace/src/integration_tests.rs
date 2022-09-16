@@ -143,7 +143,7 @@ mod tests {
             .instantiate_contract(
                 nft_id,
                 Addr::unchecked(ADMIN),
-                &nft::contract::InstantiateMsg {
+                &cw721_base::InstantiateMsg {
                     name,
                     symbol,
                     minter,
@@ -217,7 +217,7 @@ mod tests {
         token_uri: Option<String>,
         to: String,
     ) -> () {
-        let mint_msg = nft::contract::MintMsg {
+        let mint_msg = cw721_base::MintMsg {
             token_id,
             owner: to,
             token_uri,

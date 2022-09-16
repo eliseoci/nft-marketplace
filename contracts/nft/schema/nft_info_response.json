@@ -25,13 +25,10 @@
   "definitions": {
     "Metadata": {
       "type": "object",
+      "required": [
+        "is_for_hire"
+      ],
       "properties": {
-        "animation_url": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
         "attributes": {
           "type": [
             "array",
@@ -41,7 +38,16 @@
             "$ref": "#/definitions/Trait"
           }
         },
-        "background_color": {
+        "badges": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "cohort": {
           "type": [
             "string",
             "null"
@@ -53,7 +59,7 @@
             "null"
           ]
         },
-        "external_url": {
+        "github_url": {
           "type": [
             "string",
             "null"
@@ -65,11 +71,8 @@
             "null"
           ]
         },
-        "image_data": {
-          "type": [
-            "string",
-            "null"
-          ]
+        "is_for_hire": {
+          "type": "boolean"
         },
         "name": {
           "type": [
@@ -77,11 +80,14 @@
             "null"
           ]
         },
-        "youtube_url": {
+        "skills": {
           "type": [
-            "string",
+            "array",
             "null"
-          ]
+          ],
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

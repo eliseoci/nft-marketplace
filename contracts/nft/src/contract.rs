@@ -3,7 +3,9 @@ use serde::{Deserialize, Serialize};
 
 use cosmwasm_std::Empty;
 use cw2::set_contract_version;
-pub use cw721_base::{ContractError, InstantiateMsg, MintMsg, MinterResponse};
+
+use cw721_base::Cw721Contract;
+use cw721_base::InstantiateMsg;
 
 // Version info for migration
 const CONTRACT_NAME: &str = "crates.io:cw721-metadata-onchain";
@@ -19,20 +21,20 @@ pub struct Trait {
 // see: https://docs.opensea.io/docs/metadata-standards
 #[derive(Serialize, Deserialize, Clone, PartialEq, JsonSchema, Debug, Default)]
 pub struct Metadata {
-    pub image: Option<String>,
-    pub image_data: Option<String>,
-    pub external_url: Option<String>,
-    pub description: Option<String>,
     pub name: Option<String>,
+    pub image: Option<String>,
+    pub cohort: Option<String>,
+    pub description: Option<String>,
     pub attributes: Option<Vec<Trait>>,
-    pub background_color: Option<String>,
-    pub animation_url: Option<String>,
-    pub youtube_url: Option<String>,
+    pub badges: Option<Vec<String>>,
+    pub skills: Option<Vec<String>>,
+    pub github_url: Option<String>,
+    pub is_for_hire: bool,
 }
 
 pub type Extension = Option<Metadata>;
 
-pub type Cw721MetadataContract<'a> = cw721_base::Cw721Contract<'a, Extension, Empty>;
+pub type Cw721MetadaNonTransferableContract<'a> = Cw721Contract<'a, Extension, Empty>;
 pub type ExecuteMsg = cw721_base::ExecuteMsg<Extension>;
 pub type QueryMsg = cw721_base::QueryMsg;
 
@@ -40,8 +42,10 @@ pub type QueryMsg = cw721_base::QueryMsg;
 pub mod entry {
     use super::*;
 
+    use crate::msg::ExecuteMsg;
     use cosmwasm_std::entry_point;
     use cosmwasm_std::{Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
+    use cw721_base::ContractError;
 
     // This makes a conscious choice on the various generics used by the contract
     #[entry_point]
@@ -51,7 +55,12 @@ pub mod entry {
         info: MessageInfo,
         msg: InstantiateMsg,
     ) -> Result<Response, ContractError> {
-        let res = Cw721MetadataContract::default().instantiate(deps.branch(), env, info, msg)?;
+        let res = Cw721MetadaNonTransferableContract::default().instantiate(
+            deps.branch(),
+            env,
+            info,
+            msg,
+        )?;
         // Explicitly set contract name and version, otherwise set to cw721-base info
         set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)
             .map_err(ContractError::Std)?;
@@ -63,14 +72,55 @@ pub mod entry {
         deps: DepsMut,
         env: Env,
         info: MessageInfo,
-        msg: ExecuteMsg,
+        msg: ExecuteMsg<Extension>,
     ) -> Result<Response, ContractError> {
-        Cw721MetadataContract::default().execute(deps, env, info, msg)
+        match msg {
+            ExecuteMsg::Mint(mint_msg) => {
+                Cw721MetadaNonTransferableContract::default().mint(deps, env, info, mint_msg)
+            }
+            ExecuteMsg::UpdateMetadata {
+                token_id,
+                token_uri,
+            } => execute_update_on_chain_metadata(deps, env, info, token_id, token_uri),
+        }
     }
 
     #[entry_point]
     pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
-        Cw721MetadataContract::default().query(deps, env, msg)
+        Cw721MetadaNonTransferableContract::default().query(deps, env, msg)
+    }
+
+    fn execute_update_on_chain_metadata(
+        deps: DepsMut,
+        _env: Env,
+        info: MessageInfo,
+        token_id: String,
+        token_uri: String,
+    ) -> Result<Response, ContractError> {
+        let tract = Cw721MetadaNonTransferableContract::default();
+        let minter = tract.minter.load(deps.storage)?;
+        if info.sender != minter {
+            Err(ContractError::Unauthorized {})
+        } else {
+            let mut old_uri = "".to_string();
+            tract
+                .tokens
+                .update(deps.storage, &token_id, |token| match token {
+                    Some(mut token_info) => match token_info.token_uri {
+                        Some(uri) => {
+                            old_uri = uri.clone();
+                            token_info.token_uri = Some(token_uri.clone());
+                            Ok(token_info)
+                        }
+                        None => {
+                            token_info.token_uri = Some(token_uri.clone());
+                            Ok(token_info)
+                        }
+                    },
+                    None => Err(ContractError::Unauthorized {}),
+                })?;
+            Ok(Response::new())
+        }
     }
 }
 
@@ -80,13 +130,14 @@ mod tests {
 
     use cosmwasm_std::testing::{mock_dependencies, mock_env, mock_info};
     use cw721::Cw721Query;
+    use cw721_base::MintMsg;
 
     const CREATOR: &str = "creator";
 
     #[test]
     fn use_metadata_extension() {
         let mut deps = mock_dependencies();
-        let contract = Cw721MetadataContract::default();
+        let contract = Cw721MetadaNonTransferableContract::default();
 
         let info = mock_info(CREATOR, &[]);
         let init_msg = InstantiateMsg {
