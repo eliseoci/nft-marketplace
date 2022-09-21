@@ -86,7 +86,9 @@ mod tests {
     }
 
     fn marketplace_instantiate(app: &mut App, marketplace_id: u64) -> MarketplaceContract {
-        let msg = InstantiateMsg {};
+        let msg = InstantiateMsg {
+            native_denom: "ujunox".to_string()
+        };
         let marketplace_contract_address = app
             .instantiate_contract(
                 marketplace_id,

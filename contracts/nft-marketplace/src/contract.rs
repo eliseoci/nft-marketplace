@@ -15,20 +15,22 @@ use crate::msg::{
     AskResponse, Cw20HookMsg, Cw721DepositResponse, Cw721HookMsg, ExecuteMsg, InstantiateMsg,
     QueryMsg, GetAllAsksResponse,
 };
-use crate::state::{Ask, Cw721Deposits, ASKS, CW721_DEPOSITS};
+use crate::state::{Ask, Cw721Deposits, ASKS, CW721_DEPOSITS, Config, CONFIG};
 
 const CONTRACT_NAME: &str = "crates.io:nft-marketplace";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
-
-pub const NATIVE_DENOM: &str = "ujunox";
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
     deps: DepsMut,
     _env: Env,
     _info: MessageInfo,
-    _msg: InstantiateMsg,
+    msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
+    let config = Config {
+        native_denom: msg.native_denom
+    };
+    CONFIG.save(deps.storage, &config);
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     Ok(Response::default())
 }
@@ -189,8 +191,9 @@ pub fn execute_purchase_native(
     collection: String,
     token_id: String,
 ) -> Result<Response, ContractError> {
+    let config = CONFIG.load(deps.storage)?;
     let buyer = info.sender.to_string();
-    let funds_sent = must_pay(&info, NATIVE_DENOM).unwrap();
+    let funds_sent = must_pay(&info, &config.native_denom).unwrap();
     let ask = ASKS.may_load(deps.storage, (&collection, &token_id))?;
     match ask {
         Some(ask) => {
@@ -202,7 +205,7 @@ pub fn execute_purchase_native(
                 // create message to send payment to seller
                 let payment_msg = BankMsg::Send {
                     to_address: ask.seller.clone(),
-                    amount: vec![coin(ask.price.u128(), NATIVE_DENOM.to_string())],
+                    amount: vec![coin(ask.price.u128(), config.native_denom.to_string())],
                 };
                 // create message to transfer nft to buyer
                 let cw721_msg = nft::contract::ExecuteMsg::TransferNft {

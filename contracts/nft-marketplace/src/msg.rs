@@ -7,7 +7,9 @@ use crate::state::{Ask, Cw721Deposits};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-pub struct InstantiateMsg {}
+pub struct InstantiateMsg {
+    pub native_denom: String
+}
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
