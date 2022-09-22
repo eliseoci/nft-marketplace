@@ -8,7 +8,7 @@ use cw721::{
     NumTokensResponse, OperatorsResponse, OwnerOfResponse, TokensResponse,
 };
 use cw721_base::{InstantiateMsg, MinterResponse};
-use nft::contract::{ExecuteMsg, Extension, QueryMsg};
+use nft::contract::{Cw721ExecuteMsg, Extension, QueryMsg};
 
 fn main() {
     let mut out_dir = current_dir().unwrap();
@@ -17,7 +17,7 @@ fn main() {
     remove_schemas(&out_dir).unwrap();
 
     export_schema(&schema_for!(InstantiateMsg), &out_dir);
-    export_schema_with_title(&schema_for!(ExecuteMsg), &out_dir, "ExecuteMsg");
+    export_schema_with_title(&schema_for!(Cw721ExecuteMsg), &out_dir, "ExecuteMsg");
     export_schema(&schema_for!(QueryMsg), &out_dir);
     export_schema_with_title(
         &schema_for!(AllNftInfoResponse<Extension>),

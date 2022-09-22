@@ -30,7 +30,7 @@ pub fn instantiate(
     let config = Config {
         native_denom: msg.native_denom
     };
-    CONFIG.save(deps.storage, &config);
+    CONFIG.save(deps.storage, &config)?;
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     Ok(Response::default())
 }
@@ -149,7 +149,7 @@ pub fn execute_purchase(
                 });
             }
 
-            let exe_msg = nft::contract::ExecuteMsg::TransferNft {
+            let exe_msg = nft::contract::Cw721ExecuteMsg::TransferNft {
                 recipient: msg.sender,
                 token_id: token_id.clone(),
             };
@@ -208,7 +208,7 @@ pub fn execute_purchase_native(
                     amount: vec![coin(ask.price.u128(), config.native_denom.to_string())],
                 };
                 // create message to transfer nft to buyer
-                let cw721_msg = nft::contract::ExecuteMsg::TransferNft {
+                let cw721_msg = nft::contract::Cw721ExecuteMsg::TransferNft {
                     token_id: ask.token_id,
                     recipient: buyer.clone(),
                 };
@@ -295,7 +295,7 @@ pub fn execute_remove_listing(
     CW721_DEPOSITS.remove(deps.storage, (&collection, &owner, &token_id));
     ASKS.remove(deps.storage, (&collection, &token_id));
 
-    let exe_msg = nft::contract::ExecuteMsg::TransferNft {
+    let exe_msg = nft::contract::Cw721ExecuteMsg::TransferNft {
         recipient: owner,
         token_id: token_id,
     };

@@ -35,7 +35,7 @@ pub struct Metadata {
 pub type Extension = Option<Metadata>;
 
 pub type Cw721MetadaNonTransferableContract<'a> = Cw721Contract<'a, Extension, Empty>;
-pub type ExecuteMsg = cw721_base::ExecuteMsg<Extension>;
+pub type Cw721ExecuteMsg = cw721_base::ExecuteMsg<Extension>;
 pub type QueryMsg = cw721_base::QueryMsg;
 
 #[cfg(not(feature = "library"))]
@@ -81,7 +81,8 @@ pub mod entry {
             ExecuteMsg::UpdateMetadata {
                 token_id,
                 token_uri,
-            } => execute_update_on_chain_metadata(deps, env, info, token_id, token_uri),
+                metadata,
+            } => execute_update_on_chain_metadata(deps, env, info, token_id, token_uri, metadata),
         }
     }
 
@@ -96,26 +97,20 @@ pub mod entry {
         info: MessageInfo,
         token_id: String,
         token_uri: String,
+        metadata: Metadata
     ) -> Result<Response, ContractError> {
         let tract = Cw721MetadaNonTransferableContract::default();
         let minter = tract.minter.load(deps.storage)?;
         if info.sender != minter {
             Err(ContractError::Unauthorized {})
         } else {
-            let mut old_uri = "".to_string();
             tract
                 .tokens
                 .update(deps.storage, &token_id, |token| match token {
-                    Some(mut token_info) => match token_info.token_uri {
-                        Some(uri) => {
-                            old_uri = uri.clone();
-                            token_info.token_uri = Some(token_uri.clone());
-                            Ok(token_info)
-                        }
-                        None => {
-                            token_info.token_uri = Some(token_uri.clone());
-                            Ok(token_info)
-                        }
+                    Some(mut token_info) => {
+                        token_info.extension = Some(metadata);
+                        token_info.token_uri = Some(token_uri.clone());
+                        Ok(token_info)
                     },
                     None => Err(ContractError::Unauthorized {}),
                 })?;
@@ -160,7 +155,7 @@ mod tests {
                 ..Metadata::default()
             }),
         };
-        let exec_msg = ExecuteMsg::Mint(mint_msg.clone());
+        let exec_msg = Cw721ExecuteMsg::Mint(mint_msg.clone());
         contract
             .execute(deps.as_mut(), mock_env(), info, exec_msg)
             .unwrap();

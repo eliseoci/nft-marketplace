@@ -225,7 +225,7 @@ mod tests {
             token_uri,
             extension: None,
         };
-        let msg = nft::contract::ExecuteMsg::Mint(mint_msg);
+        let msg = nft::contract::Cw721ExecuteMsg::Mint(mint_msg);
         let cosmos_msg = cw721_contract.call(msg).unwrap();
         app.execute(Addr::unchecked(USER), cosmos_msg).unwrap();
     }
@@ -248,7 +248,7 @@ mod tests {
             cw20_contract: cw20_contract_address,
             amount,
         };
-        let msg = nft::contract::ExecuteMsg::SendNft {
+        let msg = nft::contract::Cw721ExecuteMsg::SendNft {
             contract: marketplace_contract.addr().to_string(),
             token_id,
             msg: to_binary(&hook_msg).unwrap(),
