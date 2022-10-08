@@ -1,4 +1,5 @@
 /target
 /node
+/tests/node_modules
 /artifacts
 .vscode

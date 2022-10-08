@@ -1,15 +1,6 @@
 [workspace]
 members = ["contracts/*"]
 
-
-[profile.release.package.cw20]
-codegen-units = 1
-incremental = false
-
-[profile.release.package.nft-marketplace]
-codegen-units = 1
-incremental = false
-
 [profile.release.package.nft]
 codegen-units = 1
 incremental = false
