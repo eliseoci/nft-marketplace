@@ -4,7 +4,7 @@ import * as fs from 'fs';
 
 const nft_wasm = fs.readFileSync("../artifacts/nft.wasm");
 // Update nft_contract_address with the address of the deployed contract
-const nft_contract_address = "juno10788h33szv07c7vt9na7jfd8c8r87gz3peu8ycdcdnwa442p8tesqy0n2c"
+const nft_contract_address = "juno159mpaj2are86udh5s59wgjdg963xul8assrvr9js8m29xnc0t7jsmxrrrw"
 const rpcEndpoint = "https://rpc.uni.junonetwork.io/";
 const gas = GasPrice.fromString("0.025ujunox");
 
@@ -42,13 +42,13 @@ describe("Soulband + Mutable NFT Tests", () => {
         const res = await client.execute(wallet_address, nft_contract_address,
             { 
                 mint: { 
-                    token_id: "1",
+                    token_id: "Cadet #2",
                     owner: wallet_address,
                     token_uri: "https://starships.example.com/Starship/Enterprise.json",
                     extension: {
                         name: "test1",
                         image: "path/to/test/image.png",
-                        cohort: "2021",
+                        cohort: "fall-2022",
                         description: "Sample description",
                         attributes: null,
                         badges: ["cosmwasm", "move"],
@@ -59,7 +59,7 @@ describe("Soulband + Mutable NFT Tests", () => {
                 } 
             }, "auto");
         console.log("Mint response: ", JSON.stringify(res))
-        const query = await client.queryContractSmart(nft_contract_address, { nft_info: { token_id: "1" } })
+        const query = await client.queryContractSmart(nft_contract_address, { nft_info: { token_id: "Cadet #1" } })
         console.log("NFT Info: ", JSON.stringify(query))
     }).timeout(40000);
 
