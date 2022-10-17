@@ -97,7 +97,7 @@ pub mod entry {
         info: MessageInfo,
         token_id: String,
         token_uri: String,
-        metadata: Metadata
+        metadata: Metadata,
     ) -> Result<Response, ContractError> {
         let tract = Cw721MetadaNonTransferableContract::default();
         let minter = tract.minter.load(deps.storage)?;
@@ -111,7 +111,7 @@ pub mod entry {
                         token_info.extension = Some(metadata);
                         token_info.token_uri = Some(token_uri.clone());
                         Ok(token_info)
-                    },
+                    }
                     None => Err(ContractError::Unauthorized {}),
                 })?;
             Ok(Response::new())

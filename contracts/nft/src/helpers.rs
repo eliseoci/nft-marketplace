@@ -40,7 +40,7 @@ impl NftContract {
         CQ: CustomQuery,
     {
         let msg = QueryMsg::OwnerOf {
-            token_id: token_id,
+            token_id,
             include_expired: None,
         };
         let query = WasmQuery::Smart {

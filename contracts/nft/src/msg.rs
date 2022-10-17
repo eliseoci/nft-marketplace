@@ -10,5 +10,9 @@ pub enum ExecuteMsg<T> {
     /// Mint a new NFT, can only be called by the contract minter
     Mint(MintMsg<T>),
     /// Updates metadata of the NFT
-    UpdateMetadata { token_id: String, token_uri: String, metadata: Metadata },
+    UpdateMetadata {
+        token_id: String,
+        token_uri: String,
+        metadata: Metadata,
+    },
 }
